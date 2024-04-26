@@ -10,13 +10,23 @@ from core.models import *
 def create_cliente(request):
 
     name = request.data.get("name")
-    cnpj =request.data.get("cnpj")
+    cnpj = request.data.get("cnpj")
 
-    serializer = ClientSerializer(data={'name': name, 'cnpj': cnpj})
+    # serializer = ClientSerializer(data={'name': name, 'cnpj': cnpj})
 
-    if serializer.is_valid():
-        serializer.save()
+
+    if name and cnpj:   
+
+        if Client.objects.filter(name=name, cnpj=cnpj).exists():
+            return Response({"message":"exists"}, status=status.HTTP_400_BAD_REQUEST)
+
+        Client.objects.create(name=name, cnpj=cnpj)
         return Response({"message":"created"}, status=status.HTTP_201_CREATED)
+    
+
+    # if serializer.is_valid():
+    #     serializer.save()
+    #     return Response({"message":"created"}, status=status.HTTP_201_CREATED)
     
     return Response({"message":"invalid"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -55,6 +65,7 @@ def delete_client(request):
 
     client_id = request.query_params.get('id-client')
     delete_to_client = Client.objects.filter(id=client_id).first()
+    
 
     if delete_to_client:
         serializer = ClientSerializer(delete_to_client)
