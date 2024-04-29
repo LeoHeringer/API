@@ -12,23 +12,29 @@ def create_cliente(request):
     name = request.data.get("name")
     cnpj = request.data.get("cnpj")
 
-    # serializer = ClientSerializer(data={'name': name, 'cnpj': cnpj})
-
-
-    if name and cnpj:   
-
-        if Client.objects.filter(name=name, cnpj=cnpj).exists():
-            return Response({"message":"exists"}, status=status.HTTP_400_BAD_REQUEST)
-
-        Client.objects.create(name=name, cnpj=cnpj)
-        return Response({"message":"created"}, status=status.HTTP_201_CREATED)
+    if not name.strip() or not cnpj.strip():
+        return Response({'message': "invalid str"}, status=status.HTTP_400_BAD_REQUEST)
     
+    if Client.objects.filter(name=name, cnpj=cnpj).exists():
+        return Response({"message":"exists"}, status=status.HTTP_400_BAD_REQUEST)
 
+
+    if name and cnpj:
+        Client.objects.create(name=name, cnpj=cnpj)
+        return Response({"message":"create"}, status=status.HTTP_200_OK)
+    
+    return Response({"message":"invalid"}, status=status.HTTP_400_BAD_REQUEST)
+    
+    # if Client.objects.filter(name=name, cnpj=cnpj).exists():
+    #     return Response({"message": "exists"}, status=status.HTTP_400_BAD_REQUEST)
+        
+    # serializer = ClientSerializer(data=request.data)
+    
     # if serializer.is_valid():
     #     serializer.save()
     #     return Response({"message":"created"}, status=status.HTTP_201_CREATED)
     
-    return Response({"message":"invalid"}, status=status.HTTP_400_BAD_REQUEST)
+    # return Response({"message":"invalid"}, status=status.HTTP_400_BAD_REQUEST)
 
     
 @api_view(['GET'])
@@ -46,16 +52,25 @@ def update_client(request):
 
     client_id = request.query_params.get('id-client')
     update_client = Client.objects.filter(id=client_id).first()
-    print(client_id)
-
+    
     if not update_client:
         return Response({"message": "client not found"}, status=status.HTTP_404_NOT_FOUND)
+    
 
-    serializer = ClientSerializer(update_client, data=request.data)
+    name = request.data.get('name')
+    cnpj = request.data.get('cnpj')
 
-    if serializer.is_valid():
-        serializer.save()
+    if name and name.strip() and cnpj.strip():
+        update_client.name = name
+        update_client.cnpj = cnpj
+        update_client.save()
         return Response({"message": "updated successfully"}, status=status.HTTP_200_OK)
+    
+    # serializer = ClientSerializer(update_client, data=request.data)
+
+    # if serializer.is_valid():
+    #     serializer.save()
+    #     return Response({"message": "updated successfully"}, status=status.HTTP_200_OK)
 
     return Response({"message": "invalid"}, status=status.HTTP_400_BAD_REQUEST)
 
