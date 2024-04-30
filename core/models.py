@@ -14,6 +14,11 @@ class Vehicle(models.Model):
     placa = models.CharField(max_length=300, null=False, blank=False)
     model = models.CharField(max_length=200, null=False, blank=False)
     created_at = models.DateTimeField(auto_now=True)
+    client = models.ForeignKey(Client, on_delete=models.CASCADE)
+
+    class Meta:
+        managed = False
+        db_table = 'core_vehicle'
 
 class Condutor(models.Model):
 

@@ -12,7 +12,12 @@ def create_cliente(request):
     name = request.data.get("name")
     cnpj = request.data.get("cnpj")
 
-    if not name.strip() or not cnpj.strip():
+
+    if not name:
+        return Response({'message': "invalid str"}, status=status.HTTP_400_BAD_REQUEST)
+    
+    
+    if not cnpj:
         return Response({'message': "invalid str"}, status=status.HTTP_400_BAD_REQUEST)
     
     if Client.objects.filter(name=name, cnpj=cnpj).exists():
@@ -24,19 +29,52 @@ def create_cliente(request):
         return Response({"message":"create"}, status=status.HTTP_200_OK)
     
     return Response({"message":"invalid"}, status=status.HTTP_400_BAD_REQUEST)
-    
-    # if Client.objects.filter(name=name, cnpj=cnpj).exists():
-    #     return Response({"message": "exists"}, status=status.HTTP_400_BAD_REQUEST)
-        
-    # serializer = ClientSerializer(data=request.data)
-    
-    # if serializer.is_valid():
-    #     serializer.save()
-    #     return Response({"message":"created"}, status=status.HTTP_201_CREATED)
-    
-    # return Response({"message":"invalid"}, status=status.HTTP_400_BAD_REQUEST)
 
+@api_view(['POST'])
+def create_vehicle_id(request: Request) -> Response:
     
+    veihcle_placa = request.data.get('placa')
+    veihcle_model = request.data.get('model')
+    veihcle_client_id = request.data.get('client_id')
+    
+    if not veihcle_placa:
+        return Response({"message": "Placa invalid"}, status=status.HTTP_400_BAD_REQUEST)
+    
+    if not veihcle_model:
+        return Response({"message": "Model invalid"}, status=status.HTTP_400_BAD_REQUEST)
+    
+    if not Client.objects.filter(id=veihcle_client_id).exists():
+        return Response({"message": "Client not found"}, status=status.HTTP_400_BAD_REQUEST)
+
+    if not veihcle_client_id:
+        return Response({"message": "Client ID invalid"}, status=status.HTTP_400_BAD_REQUEST)
+    
+    client = Client.objects.filter(id=veihcle_client_id).first()
+    Vehicle.objects.create(placa=veihcle_placa, model=veihcle_model, client=client)
+
+    return Response({"message": "CLient created successfully"}, status=status.HTTP_201_CREATED)
+
+@api_view(['POST'])
+def create_veihcle_name(request: Request) -> Response:
+
+    veihcle_placa = request.data.get('placa')
+    veihcle_model = request.data.get('model')
+    client_name = request.data.get('name')
+
+    if not veihcle_placa:
+        return Response({"message": "Placa invalid"}, status=status.HTTP_400_BAD_REQUEST)
+    
+    if not veihcle_model:
+        return Response({"message": "Model invalid"}, status=status.HTTP_400_BAD_REQUEST)
+    
+    
+    if Client.objects.filter(name = client_name).exists():
+        return Response({"message": "Client not found"}, status=status.HTTP_400_BAD_REQUEST)
+    
+    if not client_name:
+        return Response({"message": "Client invalid"}, status=status.http)
+
+
 @api_view(['GET'])
 def get_client(request):
 
@@ -60,19 +98,15 @@ def update_client(request):
     name = request.data.get('name')
     cnpj = request.data.get('cnpj')
 
-    if name and name.strip() and cnpj.strip():
-        update_client.name = name
-        update_client.cnpj = cnpj
-        update_client.save()
-        return Response({"message": "updated successfully"}, status=status.HTTP_200_OK)
+
+    if not name or not cnpj:
+        return Response({"message":"invalid"}, status=status.HTTP_400_BAD_REQUEST)
+
+    update_client.name = name
+    update_client.cnpj = cnpj
+    update_client.save()
+    return Response({"message": "updated successfully"}, status=status.HTTP_200_OK)
     
-    # serializer = ClientSerializer(update_client, data=request.data)
-
-    # if serializer.is_valid():
-    #     serializer.save()
-    #     return Response({"message": "updated successfully"}, status=status.HTTP_200_OK)
-
-    return Response({"message": "invalid"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['DELETE'])
